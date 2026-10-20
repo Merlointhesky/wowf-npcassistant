@@ -1,0 +1,15 @@
+## Interface: 16001
+## Title: ForeverNPCAssistant
+## Notes: Automates quest acceptance/completion, vendor dialogs, and highlights upgrade quest rewards.
+## Version: 1.0.0
+## Author: merlointhesky (Merlointhesky)
+## X-Category: Quest
+## X-Localizations: enUS
+## SavedVariables: ForeverNPCAssistantDB
+
+core.lua
+gossip_automation.lua
+quest_automation.lua
+vendor_automation.lua
+reward_highlight.lua
+options.lua
