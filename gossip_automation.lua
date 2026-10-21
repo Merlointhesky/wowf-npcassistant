@@ -6,6 +6,7 @@ frame:RegisterEvent("GOSSIP_SHOW")
 frame:RegisterEvent("QUEST_GREETING")
 
 frame:SetScript("OnEvent", function(self, event, ...)
+    FNPA:DebugLog("GossipAutomation event: " .. tostring(event))
     if FNPA.settings and FNPA.settings.autoSkipGossip == false then return end
     if IsShiftKeyDown and IsShiftKeyDown() then return end
 

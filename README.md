@@ -1,6 +1,6 @@
 # ForeverNPCAssistant
 
-**Version:** 1.0.1  
+**Version:** 1.0.2
 **Author:** merlointhesky (Merlointhesky)  
 **License:** MIT
 

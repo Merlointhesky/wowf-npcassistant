@@ -17,3 +17,7 @@ and this project adheres to Semantic Versioning (https://semver.org/spec/v2.0.0.
 ---
 ## [1.0.1] - 2026-10-21
 - added auto reward equip if upgrade is suggested.
+
+## [1.0.2] - 2026-10-22
+- improved upgrade detection and scoring
+- improved upgrade popup

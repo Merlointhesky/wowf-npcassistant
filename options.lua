@@ -7,6 +7,7 @@ local defaults = {
     autoSkipGossip = true,
     rewardHighlight = true,
     minimapPos = 225,
+    debugUI = false,
 }
 
 local configFrame = CreateFrame("Frame", "ForeverNPCAssistantOptionsPanel", UIParent, "BackdropTemplate,BasicFrameTemplateWithInset")
@@ -51,6 +52,7 @@ local function InitOptionsPanel()
     createCheck("Auto-complete simple quests", "autoComplete", -75)
     createCheck("Auto-skip gossip dialogs", "autoSkipGossip", -105)
     createCheck("Highlight upgrade quest rewards", "rewardHighlight", -135)
+    createCheck("Debug UI window events", "debugUI", -165)
 end
 
 local function UpdateMinimapButtonPosition(button, angle)
@@ -147,5 +149,9 @@ FNPA.Events["ADDON_LOADED"] = function(self, loadedAddon)
 
         InitOptionsPanel()
         CreateMinimapButton()
+        -- Initialize debug UI hooks if enabled
+        if FNPA.settings.debugUI then
+            FNPA:SetupDebugHooks()
+        end
     end
 end
