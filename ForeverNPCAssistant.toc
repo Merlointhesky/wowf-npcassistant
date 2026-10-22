@@ -11,5 +11,4 @@ core.lua
 gossip_automation.lua
 quest_automation.lua
 vendor_automation.lua
-reward_highlight.lua
 options.lua

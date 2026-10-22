@@ -80,11 +80,26 @@ local function GetItemDetails(itemLink)
     local effects = {}
     if C_Item and C_Item.GetItemSpell then
         local spellID = C_Item.GetItemSpell(itemLink)
-        if spellID then table.insert(effects, GetSpellInfo(spellID) or "") end
+        if spellID then
+            if C_Spell and C_Spell.GetSpellInfo then
+                local spellInfo = C_Spell.GetSpellInfo(spellID)
+                table.insert(effects, (spellInfo and spellInfo.name) or tostring(spellID))
+            elseif GetSpellInfo then
+                table.insert(effects, GetSpellInfo(spellID) or "")
+            end
+        end
     elseif GetItemSpell then
         local spellID = GetItemSpell(itemLink)
-        if spellID then table.insert(effects, GetSpellInfo(spellID) or "") end
+        if spellID then
+            if C_Spell and C_Spell.GetSpellInfo then
+                local spellInfo = C_Spell.GetSpellInfo(spellID)
+                table.insert(effects, (spellInfo and spellInfo.name) or tostring(spellID))
+            elseif GetSpellInfo then
+                table.insert(effects, GetSpellInfo(spellID) or "")
+            end
+        end
     end
+
 
     return {
         name = name,
