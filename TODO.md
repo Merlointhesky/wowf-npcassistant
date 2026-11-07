@@ -1,7 +1,5 @@
-#FOREVER NPC ASSISTANT
-##BUG
-- auto equip of quest reward does not show the target equipped item at all
+# FOREVER NPC ASSISTANT
 
-##FEATURE
-- auto equip of quest reward could show the stats difference between teh currently equipped and the new item (with + and - stats in green and red)
-
+## RESOLVED BUGS & FEATURES (v1.1.0)
+- [x] **BUG**: Auto equip of quest reward now accurately resolves and displays the target equipped item(s) across single-slot armor, dual-slot rings/trinkets, and 1H/2H/Off-hand weapon combinations using `SetInventoryItem("player", slot)`.
+- [x] **FEATURE**: Auto equip of quest reward now displays a full color-coded stat difference summary (`+` in green, `-` in red, with `(old -> new)` values) covering Item Level, Weapon DPS & Speed, Armor, Primary/Secondary stats, and `Equip:`/`Use:` effects.

@@ -1,6 +1,6 @@
 # ForeverNPCAssistant
 
-**Version:** 1.0.2
+**Version:** 1.1.0  
 **Author:** merlointhesky (Merlointhesky)  
 **License:** MIT
 
@@ -8,101 +8,65 @@
 
 ## Overview
 
-ForeverNPCAssistant is a World of Warcraft Classic Beta add‑on that automates repetitive NPC interactions such as quest acceptance/completion and gossip dialogs. It is built to work with the **WoW Forever Beta** client, leveraging the modern `C_` API namespaces where possible while gracefully falling back to legacy functions when needed.
+ForeverNPCAssistant is a World of Warcraft Forever (1.6 / Interface `16001`) add‑on that automates repetitive NPC interactions such as quest acceptance/completion, single-option gossip/vendor dialogs, and quest reward upgrade highlighting with a side-by-side equip prompt and color-coded stat comparisons.
 
 ---
 
 ## Features
 
-- **Quest Automation** – Automatically accept, turn in, and complete quests when you talk to quest‑givers.
-- **Gossip Automation** – Skips unnecessary gossip windows and selects the appropriate options for you.
-- **Event‑driven Architecture** – Listens to the relevant Blizzard events (`QUEST_DETAIL`, `GOSSIP_SHOW`, etc.) and reacts instantly.
-- **Modern API First** – Uses `C_TradeSkillUI`, `C_Container`, `C_Item`, `C_CurrencyInfo`, and other `C_` APIs before falling back to the classic globals.
-- **Safe Logout Handling** – Avoids the `PLAYER_LOGOUT` teardown pitfalls by only saving offline timers during logout.
+- **Quest Automation** – Automatically accept, progress, and complete simple quests when talking to quest‑givers (hold `Shift` to bypass).
+- **Gossip & Vendor Automation** – Skips single-option gossip dialogs and 2-step vendor gossip menus when no quests are available.
+- **Upgrade Reward Highlighting** – Evaluates quest reward choices using class-weighted stats, weapon DPS, armor proficiency, and item level, highlighting the top upgrade with a green border and `^` indicator.
+- **Side-by-Side Upgrade Equip Prompt & Stat Diff** – Displays the new quest reward alongside your currently equipped item(s) with color-coded `+` (green) and `-` (red) stat deltas (`old -> new`) and a one-click **Equip Upgrade** button.
+- **Minimap Button & Options Panel** – Left-click the minimap button or run `/npcassist` (`/fnpa`) to toggle any automation feature or test the upgrade popup.
 
 ---
 
 ## Installation
 
-1. Download or clone the repository into your WoW Classic Beta AddOns directory:
+1. Copy `ForeverNPCAssistant` into your WoW Forever AddOns directory:
    ```
-   c:\Program Files (x86)\World of Warcraft\_classic_beta_\Interface\AddOns\ForeverNPCAssistant
+   c:\Program Files (x86)\World of Warcraft\_forever_\Interface\AddOns\ForeverNPCAssistant
    ```
-2. Ensure the folder contains the following files:
-   - `ForeverNPCAssistant.toc`
-   - `core.lua`
-   - `quest_automation.lua`
-   - `gossip_automation.lua`
-   - `README.md`
-3. Restart the game or reload the UI (`/reload`). The add‑on should appear in the AddOns list.
+2. Restart the game or reload the UI (`/reload`).
 
 ---
 
-## Usage
+## Usage & Slash Commands
 
-The add‑on works automatically once enabled. No additional UI is exposed, but you can toggle its behaviour via the following slash commands:
+- `/npcassist` or `/fnpa` – Open/close the options panel.
+- `/npcassist on` – Enable quest & gossip automation.
+- `/npcassist off` – Disable quest & gossip automation.
+- `/npcassist status` – Print current settings to chat.
+- `/npcassist test` – Preview the side-by-side upgrade popup using your currently equipped gear.
+- `/npcassist debug` – Toggle diagnostic event logging.
 
-- `/npcassist on` – Enable automation (default).
-- `/npcassist off` – Disable automation for the current session.
-- `/npcassist status` – Print the current state to the chat frame.
-
-The add‑on respects the standard WoW combat lock‑down; automation is paused while you are in combat and resumes afterwards.
-
----
-
-## API Details & Compatibility
-
-### Modern API Preference
-The **WoW Forever Beta** client mixes a modern retail engine with a Classic wrapper. To ensure forward compatibility we:
-
-- **Prioritize `C_` namespaces** (e.g., `C_Item.GetItemInfo`).
-- **Fallback to legacy globals** only when the modern call is unavailable.
-- **Update event hooks** to use the newer event names (e.g., `TRADE_SKILL_LIST_UPDATE` instead of the removed `TRADE_SKILL_UPDATE`).
-
-### Known Edge Cases
-- **Logout Teardown** – Do **not** query live character state (`GetMoney()`, `UnitClassBase()`) inside `PLAYER_LOGOUT`; data may be corrupted. The add‑on only records offline timers during logout.
-- **Return Value Shifts** – Functions like `GetInboxItem()` now return `itemID` as the second return value. The code accounts for this by explicitly naming each returned variable.
+Hold **Shift** while interacting with an NPC to temporarily pause automation.
 
 ---
 
 ## Configuration
 
-Configuration is stored in the saved variables file `ForeverNPCAssistant.lua`. You can edit the following settings manually:
+Settings are stored in `ForeverNPCAssistantDB`:
 
 ```lua
-ForeverNPCAssistant = {
-  enableQuestAutomation = true,
-  enableGossipAutomation = true,
-  debugMode = false,
+ForeverNPCAssistantDB = {
+  autoAccept = true,
+  autoComplete = true,
+  autoSkipGossip = true,
+  rewardHighlight = true,
+  autoEquipPrompt = true,
+  minimapPos = 225,
+  debugUI = false,
 }
 ```
-
-Set `debugMode = true` to see diagnostic messages in the chat frame.
-
----
-
-## Development
-
-If you wish to contribute:
-
-1. Fork the repository.
-2. Make your changes in the `core.lua`, `quest_automation.lua`, or `gossip_automation.lua` files.
-3. Run a `/reload` in‑game to test.
-4. Submit a pull request.
-
-Please keep the **modern API first** rule in mind when adding new functionality.
 
 ---
 
 ## License
 
-Distributed under the MIT License. See the `LICENSE` file for details.
+Distributed under the MIT License.
 
----
-
-## Support
-
-For questions or bug reports, join the Discord channel *#forever-npc-assist* or create an issue on the GitHub repository.
 ## Repository
 
 [GitHub Repository](https://github.com/Merlointhesky/wowf-npcassistant)
