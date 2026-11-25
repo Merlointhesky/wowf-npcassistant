@@ -2,7 +2,7 @@
 
 **Version:** 1.2.0  
 **Author:** merlointhesky (Merlointhesky)  
-**License:** MIT
+**License:** GNU General Public License v3.0 (GPL-3.0)
 
 ---
 
@@ -68,7 +68,7 @@ ForeverNPCAssistantDB = {
 
 ## License
 
-Distributed under the MIT License.
+This project is licensed under the **GNU General Public License v3.0** (GPL-3.0). See the [LICENSE](LICENSE) file for complete details.
 
 ## Repository
 
