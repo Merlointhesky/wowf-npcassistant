@@ -4,6 +4,7 @@ FNPA = FNPA or _G.ForeverNPCAssistant
 
 local defaults = {
     autoAccept = true,
+    acceptLowLevelQuests = false,
     autoComplete = true,
     autoSkipGossip = true,
     rewardHighlight = true,
@@ -13,7 +14,7 @@ local defaults = {
 }
 
 local configFrame = CreateFrame("Frame", "ForeverNPCAssistantOptionsPanel", UIParent, "BackdropTemplate,BasicFrameTemplateWithInset")
-configFrame:SetSize(310, 290)
+configFrame:SetSize(330, 320)
 configFrame:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
 configFrame:SetMovable(true)
 configFrame:EnableMouse(true)
@@ -67,11 +68,12 @@ local function InitOptionsPanel()
     end
 
     createCheck("Auto-accept quests", "autoAccept", -40)
-    createCheck("Auto-complete simple quests", "autoComplete", -68)
-    createCheck("Auto-skip gossip & vendor dialogs", "autoSkipGossip", -96)
-    createCheck("Highlight upgrade quest rewards", "rewardHighlight", -124)
-    createCheck("Prompt to equip upgrade rewards", "autoEquipPrompt", -152)
-    createCheck("Debug UI & event logging", "debugUI", -180)
+    createCheck("Always auto-accept low-level quests", "acceptLowLevelQuests", -68)
+    createCheck("Auto-complete simple quests", "autoComplete", -96)
+    createCheck("Auto-skip gossip & vendor dialogs", "autoSkipGossip", -124)
+    createCheck("Highlight upgrade quest rewards", "rewardHighlight", -152)
+    createCheck("Prompt to equip upgrade rewards", "autoEquipPrompt", -180)
+    createCheck("Debug UI & event logging", "debugUI", -208)
 
     local testBtn = CreateFrame("Button", nil, configFrame, "GameMenuButtonTemplate")
     testBtn:SetPoint("BOTTOMLEFT", 20, 16)
@@ -164,7 +166,11 @@ local function CreateMinimapButton()
         GameTooltip:SetOwner(self, "ANCHOR_LEFT")
         GameTooltip:SetText("Forever NPC Assistant", 1, 1, 1)
         if ForeverNPCAssistantDB then
+            local trackingLow = FNPA.IsTrackingLowLevelQuests and FNPA:IsTrackingLowLevelQuests()
+            local lowStatus = ForeverNPCAssistantDB.acceptLowLevelQuests and "|cff00ff00Always|r"
+                or (trackingLow and "|cff00ff00Auto (Minimap Tracking)|r" or "|cffffaa00Ignored|r")
             GameTooltip:AddDoubleLine("Auto-Accept Quests:", ForeverNPCAssistantDB.autoAccept and "|cff00ff00Enabled|r" or "|cffff0000Disabled|r")
+            GameTooltip:AddDoubleLine("Low-Level Quests:", lowStatus)
             GameTooltip:AddDoubleLine("Auto-Complete Quests:", ForeverNPCAssistantDB.autoComplete and "|cff00ff00Enabled|r" or "|cffff0000Disabled|r")
             GameTooltip:AddDoubleLine("Auto-Skip Gossip:", ForeverNPCAssistantDB.autoSkipGossip and "|cff00ff00Enabled|r" or "|cffff0000Disabled|r")
             GameTooltip:AddDoubleLine("Highlight Upgrades:", ForeverNPCAssistantDB.rewardHighlight and "|cff00ff00Enabled|r" or "|cffff0000Disabled|r")
@@ -233,12 +239,22 @@ SlashCmdList["FOREVERNPCASSISTANT"] = function(msg)
         end
     elseif cleanMsg == "status" then
         if ForeverNPCAssistantDB then
+            local trackingLow = FNPA.IsTrackingLowLevelQuests and FNPA:IsTrackingLowLevelQuests()
+            local lowStatus = ForeverNPCAssistantDB.acceptLowLevelQuests and "|cff00ff00ON (Always)|r"
+                or (trackingLow and "|cff00ff00ON (Tracking Low-Level Quests)|r" or "|cffffaa00Ignored (Default)|r")
             print("|cff00ff00[Forever NPC Assistant] Status:|r")
             print("  Auto-Accept Quests: " .. (ForeverNPCAssistantDB.autoAccept and "|cff00ff00ON|r" or "|cffff0000OFF|r"))
+            print("  Low-Level Quests: " .. lowStatus)
             print("  Auto-Complete Quests: " .. (ForeverNPCAssistantDB.autoComplete and "|cff00ff00ON|r" or "|cffff0000OFF|r"))
             print("  Auto-Skip Gossip: " .. (ForeverNPCAssistantDB.autoSkipGossip and "|cff00ff00ON|r" or "|cffff0000OFF|r"))
             print("  Highlight Upgrades: " .. (ForeverNPCAssistantDB.rewardHighlight and "|cff00ff00ON|r" or "|cffff0000OFF|r"))
             print("  Equip Upgrade Prompt: " .. (ForeverNPCAssistantDB.autoEquipPrompt and "|cff00ff00ON|r" or "|cffff0000OFF|r"))
+        end
+    elseif cleanMsg == "lowlevel" or cleanMsg == "low" or cleanMsg == "trivial" then
+        if ForeverNPCAssistantDB then
+            ForeverNPCAssistantDB.acceptLowLevelQuests = not ForeverNPCAssistantDB.acceptLowLevelQuests
+            FNPA:RefreshOptionCheckboxes()
+            print("|cff00ff00[Forever NPC Assistant]|r Always auto-accept low-level quests: " .. (ForeverNPCAssistantDB.acceptLowLevelQuests and "|cff00ff00ON|r" or "|cffff0000OFF (follows minimap tracking)|r"))
         end
     elseif cleanMsg == "debug" then
         if ForeverNPCAssistantDB then
@@ -255,6 +271,7 @@ SlashCmdList["FOREVERNPCASSISTANT"] = function(msg)
         print("|cff00ff00Forever NPC Assistant commands:|r")
         print("  |cffffff00/npcassist|r (or |cffffff00/fnpa|r) - Toggle configuration window")
         print("  |cffffff00/npcassist on|r / |cffffff00off|r - Enable or disable NPC automation")
+        print("  |cffffff00/npcassist lowlevel|r - Toggle always auto-accepting low-level quests")
         print("  |cffffff00/npcassist status|r - Show current settings")
         print("  |cffffff00/npcassist test|r - Preview upgrade equip popup")
         print("  |cffffff00/npcassist debug|r - Toggle debug logging")

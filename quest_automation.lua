@@ -1254,17 +1254,124 @@ end
 -------------------------------------------------------------------------------
 -- Centralized Event Handlers
 -------------------------------------------------------------------------------
+local function IsCurrentQuestDetailTrivial()
+    if C_QuestLog and C_QuestLog.IsQuestTrivial and GetQuestID then
+        local qID = GetQuestID()
+        if qID and qID > 0 then
+            local ok, trivial = pcall(C_QuestLog.IsQuestTrivial, qID)
+            if ok and trivial ~= nil then
+                return trivial and true or false
+            end
+        end
+    end
+    if IsCurrentQuestTrivial then
+        local ok, trivial = pcall(IsCurrentQuestTrivial)
+        if ok and trivial ~= nil then
+            return trivial and true or false
+        end
+    end
+    if GetQuestLevel and FNPA.IsQuestLevelTrivial then
+        local ok, level = pcall(GetQuestLevel)
+        if ok and level then
+            return FNPA:IsQuestLevelTrivial(level)
+        end
+    end
+    return false
+end
+
+local function ShouldContinueMultiQuestNpc()
+    if IsShiftKeyDown and IsShiftKeyDown() then return false end
+    if InCombatLockdown and InCombatLockdown() then return false end
+    if GossipFrame and GossipFrame:IsShown() then return true end
+    if QuestFrameGreetingPanel and QuestFrameGreetingPanel:IsShown() then return true end
+    if C_GossipInfo and C_GossipInfo.GetAvailableQuests then
+        local avail = C_GossipInfo.GetAvailableQuests() or {}
+        local active = (C_GossipInfo.GetActiveQuests and C_GossipInfo.GetActiveQuests()) or {}
+        if #avail > 0 or #active > 0 then return true end
+    end
+    if GetNumAvailableQuests and (GetNumAvailableQuests() or 0) > 0 then return true end
+    if GetNumActiveQuests and (GetNumActiveQuests() or 0) > 0 then return true end
+    return false
+end
+
+local function ScheduleMultiQuestContinuation()
+    if not (C_Timer and C_Timer.After) then return end
+    C_Timer.After(0.25, function()
+        if not ShouldContinueMultiQuestNpc() then return end
+        if QuestFrameDetailPanel and QuestFrameDetailPanel:IsShown() then return end
+        if QuestFrameProgressPanel and QuestFrameProgressPanel:IsShown() then return end
+        if QuestFrameRewardPanel and QuestFrameRewardPanel:IsShown() then return end
+
+        if GossipFrame and GossipFrame:IsShown() and FNPA.Events["GOSSIP_SHOW"] then
+            FNPA:DebugLog("Continuing multi-quest rotation on GossipFrame")
+            FNPA.Events["GOSSIP_SHOW"](FNPA)
+        elseif QuestFrameGreetingPanel and QuestFrameGreetingPanel:IsShown() and FNPA.Events["QUEST_GREETING"] then
+            FNPA:DebugLog("Continuing multi-quest rotation on QuestFrameGreetingPanel")
+            FNPA.Events["QUEST_GREETING"](FNPA)
+        elseif C_GossipInfo and C_GossipInfo.GetAvailableQuests and #(C_GossipInfo.GetAvailableQuests() or {}) > 0 and FNPA.Events["GOSSIP_SHOW"] then
+            FNPA:DebugLog("Continuing multi-quest rotation via C_GossipInfo")
+            FNPA.Events["GOSSIP_SHOW"](FNPA)
+        end
+    end)
+end
+
 FNPA.Events["QUEST_DETAIL"] = function(self)
     FNPA:DebugLog("QuestAutomation event: QUEST_DETAIL")
     if IsShiftKeyDown and IsShiftKeyDown() then return end
     if not isEnabled("autoAccept") then return end
 
+    -- Check if the quest is trivial (low-level) and should be ignored
+    local allowLowLevel = (FNPA.ShouldAcceptLowLevelQuests and FNPA:ShouldAcceptLowLevelQuests()) or false
+    if not allowLowLevel and IsCurrentQuestDetailTrivial() then
+        FNPA:DebugLog("QUEST_DETAIL: Ignoring low-level quest offer")
+        return
+    end
+
+    local function doAcceptQuest()
+        if IsShiftKeyDown and IsShiftKeyDown() then return end
+        if not isEnabled("autoAccept") then return end
+        if not allowLowLevel and IsCurrentQuestDetailTrivial() then return end
+
+        local qID = GetQuestID and GetQuestID() or nil
+        local qTitle = GetTitleText and GetTitleText() or nil
+        local detailVisible = (QuestFrameDetailPanel and QuestFrameDetailPanel:IsShown())
+                           or (QuestFrame and QuestFrame:IsShown())
+                           or (qID and qID > 0)
+
+        if detailVisible and AcceptQuest then
+            if FNPA.MarkQuestAccepted then
+                FNPA:MarkQuestAccepted(qID, qTitle)
+            end
+            FNPA:DebugLog("Accepting quest: " .. tostring(qTitle or qID or ""))
+            AcceptQuest()
+            if QuestGetAutoAccept and QuestGetAutoAccept() and CloseQuest then
+                CloseQuest()
+            end
+            ScheduleMultiQuestContinuation()
+        end
+    end
+
     if C_Timer and C_Timer.After then
-        C_Timer.After(0.15, function()
-            if QuestFrameDetailPanel and QuestFrameDetailPanel:IsShown() then AcceptQuest() end
-        end)
+        C_Timer.After(0.15, doAcceptQuest)
     else
-        AcceptQuest()
+        doAcceptQuest()
+    end
+end
+
+FNPA.Events["QUEST_ACCEPTED"] = function(self, arg1, arg2)
+    local questID = (type(arg2) == "number" and arg2 > 0) and arg2 or (type(arg1) == "number" and arg1 or nil)
+    local title = GetTitleText and GetTitleText() or nil
+    if FNPA.MarkQuestAccepted then
+        FNPA:MarkQuestAccepted(questID, title)
+    end
+    if isEnabled("autoAccept") then
+        ScheduleMultiQuestContinuation()
+    end
+end
+
+FNPA.Events["QUEST_TURNED_IN"] = function(self, questID)
+    if isEnabled("autoAccept") or isEnabled("autoComplete") then
+        ScheduleMultiQuestContinuation()
     end
 end
 

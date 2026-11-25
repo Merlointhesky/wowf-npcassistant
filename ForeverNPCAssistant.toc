@@ -1,7 +1,7 @@
 ## Interface: 16001
 ## Title: ForeverNPCAssistant
 ## Notes: Automates quest acceptance/completion, vendor dialogs, and highlights upgrade quest rewards with side-by-side stat comparisons.
-## Version: 1.1.0
+## Version: 1.2.0
 ## Author: merlointhesky (Merlointhesky)
 ## X-Category: Quest
 ## X-Localizations: enUS

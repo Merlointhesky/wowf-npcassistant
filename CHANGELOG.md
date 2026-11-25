@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on Keep a Changelog (https://keepachangelog.com/en/1.0.0/),
 and this project adheres to Semantic Versioning (https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2026-11-25
+
+### Fixed
+- **Reliable Quest Auto-Pickup from Gossip & Greeting Panels**: Added automatic selection of available quests and completable active quests directly on `GOSSIP_SHOW` and `QUEST_GREETING` frames, plus resilient `QUEST_DETAIL` acceptance when custom quest UIs or multi-quest panels are active.
+
+### Added
+- **Multi-Quest Rotation**: When an NPC offers multiple quests, automatically filters out quests already in the player's quest log and rotates through remaining unaccepted quests.
+- **Low-Level (Trivial) Quest Filtering & Minimap Tracking Detection**: By default, low-level (gray) quests are ignored unless the player has **Track Low-Level Quests** enabled on the minimap or enables the new **"Always auto-accept low-level quests"** option (`/npcassist lowlevel`).
+
+---
 ## [1.1.0] - 2026-11-07
 
 ### Fixed
